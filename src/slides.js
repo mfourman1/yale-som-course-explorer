@@ -5,7 +5,7 @@ import * as THREE from 'three'
 export const COURSES = {
   mgt409: { code: 'MGT 409', name: 'AI Foundations for Managers', prof: 'Tauhid Zaman' },
   mgt404: { code: 'MGT 404', name: 'Basics of Economics', prof: 'Minerva McGonagall' },
-  mgt403: { code: 'MGT 403', name: 'Probability Modeling & Statistics', prof: 'Sybill Trelawney' },
+  mgt403: { code: 'MGT 407', name: 'Statistics', prof: 'Peter Schott' },
   mgt887: { code: 'MGT 887', name: 'Negotiations', prof: 'Horace Slughorn' },
   mgt402: { code: 'MGT 402', name: 'Basics of Accounting', prof: 'Severus Snape' },
   mgt538: { code: 'MGT 538', name: 'Mastering Influence & Persuasion', prof: 'Gilderoy Lockhart' },

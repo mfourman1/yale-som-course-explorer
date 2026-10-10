@@ -1,22 +1,26 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import Professor, { PROFESSORS } from './Professor.jsx'
+import ProfSchott from './ProfSchott.jsx'
 import ProfZaman from './ProfZaman.jsx'
 import { AVATARS } from './talk.js'
 import { DRUMS, LECTERNS } from './layout.js'
 
-// who teaches in which classroom (matches the slide decks): Hogwarts professors, except
-// MGT 409, where Prof. Zaman's avatar teaches and students can chat with his AI agent
+// who teaches in which classroom (matches the slide decks): Hogwarts professors, except the
+// rooms where a real professor's avatar teaches and students can chat with their AI agent
 export const ROOM_PROFESSOR = {
   2400: 'tauhid-zaman', // MGT 409 AI Foundations for Managers
   2410: 'mcgonagall', // MGT 404 Basics of Economics
-  2420: 'trelawney', // MGT 403 Probability Modeling & Statistics
+  2420: 'peter-schott', // MGT 407 Statistics
   2430: 'slughorn', // MGT 887 Negotiations
   2200: 'snape', // MGT 402 Basics of Accounting
   2210: 'lockhart', // MGT 538 Mastering Influence & Persuasion
   2220: 'moody', // MGT 800 Crisis Management in Tech
   2230: 'flitwick', // MGT 541 Corporate Finance
 }
+
+// avatars of real professors, keyed by backend professor id (see AVATARS in talk.js)
+const CHAT_AVATARS = { 'tauhid-zaman': ProfZaman, 'peter-schott': ProfSchott }
 
 function plaqueTex(name) {
   const c = document.createElement('canvas')
@@ -45,6 +49,7 @@ export default function Faculty() {
         const lec = LECTERNS[i]
         return {
           who,
+          Avatar: CHAT_AVATARS[who],
           pos: [fc[0] + back[0] * 1.15 - t[0] * half * 0.3, 0, fc[1] + back[1] * 1.15 - t[1] * half * 0.3],
           rot,
           plaque: { p: [lec.x + back[0] * 0.26, 0.85, lec.z + back[1] * 0.26], rot, mat: new THREE.MeshBasicMaterial({ map: plaqueTex((AVATARS[who] || PROFESSORS[who]).name) }) },
@@ -56,8 +61,8 @@ export default function Faculty() {
     <>
       {items.map((it, i) => (
         <group key={i}>
-          {it.who === 'tauhid-zaman' ? (
-            <ProfZaman position={it.pos} rotation={it.rot} />
+          {it.Avatar ? (
+            <it.Avatar position={it.pos} rotation={it.rot} />
           ) : (
             <Professor who={it.who} position={it.pos} rotation={it.rot} phase={i * 1.7} />
           )}

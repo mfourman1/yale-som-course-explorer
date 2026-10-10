@@ -14,6 +14,11 @@ export const AVATARS = {
     course: 'MGT 409 · AI Foundations for Managers',
     suggestions: ['Explain the central limit theorem', 'Which classes cover regression?', 'When does MGT 409 meet?'],
   },
+  'peter-schott': {
+    name: 'Peter Schott',
+    course: 'MGT 407 · Statistics',
+    suggestions: ['What is regression to the mean?', 'Explain a confidence interval', 'Which classes cover international trade?'],
+  },
 }
 
 const listeners = new Set()
