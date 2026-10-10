@@ -4,7 +4,9 @@ import World from './World.jsx'
 import Player from './Player.jsx'
 import Minimap from './Minimap.jsx'
 import TouchControls from './TouchControls.jsx'
+import ChatPanel from './ChatPanel.jsx'
 import { EYE, SPAWN } from './layout.js'
+import { AVATARS, onAimChange, talk, typing } from './talk.js'
 
 export default function App() {
   const [locked, setLocked] = useState(false)
@@ -25,10 +27,34 @@ export default function App() {
   }
   const playing = locked || touchOn
   useEffect(() => {
-    const k = (e) => e.code === 'KeyM' && setShowMap((v) => !v)
+    const k = (e) => e.code === 'KeyM' && !typing(e) && setShowMap((v) => !v)
     window.addEventListener('keydown', k)
     return () => window.removeEventListener('keydown', k)
   }, [])
+
+  // professor chats: aim at an avatar and click (or tap Talk) to open his chat window
+  const [aimed, setAimed] = useState(null)
+  const [chatWith, setChatWith] = useState(null)
+  const [threads, setThreads] = useState({}) // conversation per professor, kept when the window closes
+  useEffect(() => onAimChange(setAimed), [])
+  const openChat = useCallback((id) => {
+    talk.chatting = id
+    setChatWith(id)
+    touchRef.current.move = [0, 0]
+    if (document.pointerLockElement) document.exitPointerLock()
+  }, [])
+  const closeChat = useCallback((relock) => {
+    talk.chatting = null
+    setChatWith(null)
+    if (relock && !touchRef.current.active) lockRef.current?.()
+  }, [])
+  const setThread = useCallback((id, update) => setThreads((t) => ({ ...t, [id]: update(t[id] || []) })), [])
+  useEffect(() => {
+    const click = (e) => e.button === 0 && document.pointerLockElement && talk.aimed && openChat(talk.aimed)
+    window.addEventListener('mousedown', click)
+    return () => window.removeEventListener('mousedown', click)
+  }, [openChat])
+  const aimedName = aimed && `Prof. ${AVATARS[aimed].name.split(' ').at(-1)}`
 
   return (
     <>
@@ -50,10 +76,25 @@ export default function App() {
       <button className="maptoggle" onClick={() => setShowMap((s) => !s)}>
         {showMap ? 'hide map' : 'map'}
       </button>
-      {playing && <div className="crosshair" />}
-      {touchOn && <TouchControls touchRef={touchRef} onPause={() => setTouch(false)} />}
+      {playing && !chatWith && <div className={aimed ? 'crosshair on' : 'crosshair'} />}
+      {playing && !chatWith && aimed && !touchOn && <div className="talkhint">Click to talk to {aimedName}</div>}
+      {touchOn && !chatWith && aimed && (
+        <button className="talkbtn" onClick={() => openChat(aimed)}>
+          Talk to {aimedName}
+        </button>
+      )}
+      {touchOn && !chatWith && <TouchControls touchRef={touchRef} onPause={() => setTouch(false)} />}
+      {chatWith && (
+        <ChatPanel
+          key={chatWith}
+          prof={{ id: chatWith, ...AVATARS[chatWith] }}
+          messages={threads[chatWith] || []}
+          setMessages={(update) => setThread(chatWith, update)}
+          onClose={closeChat}
+        />
+      )}
 
-      {!playing && (
+      {!playing && !chatWith && (
         <div className="overlay" onClick={() => (isTouch ? setTouch(true) : lockRef.current?.())}>
           <div className="card">
             <div className="kicker">Yale SOM · Evans Hall</div>
